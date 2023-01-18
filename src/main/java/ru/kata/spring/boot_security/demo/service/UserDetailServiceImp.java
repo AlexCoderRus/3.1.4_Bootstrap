@@ -2,7 +2,6 @@ package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ import ru.kata.spring.boot_security.demo.repository.UserRepository;
 import java.util.*;
 
 @Service
-public class UserDetailServiceImp implements UserDetailsService {
+public class UserDetailServiceImp implements UserDetailInterface {
 
     private final UserRepository userRepository;
 
@@ -23,9 +22,8 @@ public class UserDetailServiceImp implements UserDetailsService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
     }
-
-
-    private Optional<User> findByUserName(String name) {
+    @Override
+    public Optional<User> findByUserName(String name) {
         return userRepository.findByUsername(name);
     }
 
@@ -40,17 +38,21 @@ public class UserDetailServiceImp implements UserDetailsService {
         return user.get();
     }
 
+    @Override
     @Transactional(readOnly = true)
     public User findUserById(Long id) {
         Optional<User> userById = userRepository.findById(id);
         return userById.orElse(new User());
     }
 
+
+    @Override
     @Transactional(readOnly = true)
     public List<User> allUser() {
         return userRepository.findAll();
     }
 
+    @Override
     @Transactional
     public boolean saveUser(User user) {
         Optional<User> userFromDB = userRepository.findByUsername(user.getUsername());
@@ -63,6 +65,7 @@ public class UserDetailServiceImp implements UserDetailsService {
         return true;
     }
 
+    @Override
     @Transactional
     public boolean deleteUser(Long userId) {
         if (userRepository.findById(userId).isPresent()) {
@@ -74,6 +77,7 @@ public class UserDetailServiceImp implements UserDetailsService {
         return false;
     }
 
+    @Override
     @Transactional
     public void update(User user) {;
         if (user.getPassword().isEmpty()) {
